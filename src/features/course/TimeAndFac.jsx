@@ -10,9 +10,9 @@ function TimeAndFac({
   sec,
 }) {
   return (
-    <div className="flex items-center  w-xl space-x-10 py-2 px-4 ">
+    <div className="flex flex-col md:flex-row items-start md:items-center w-full space-y-4 md:space-y-0 md:space-x-10 py-4 px-4 border-b last:border-0 border-gray-100 ">
       <Time startTime={startTime} endTime={endTime} />
-      <span className="w-px h-12 bg-gray-300"></span>
+      <span className="w-px h-12 bg-gray-300 hidden md:block"></span>
       <SecInfo
         facultyName={facultyName}
         courseCode={courseCode}
