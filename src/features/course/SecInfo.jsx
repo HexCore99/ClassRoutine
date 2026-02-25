@@ -1,30 +1,30 @@
 import { SquarePen, Trash2 } from "lucide-react";
 import Button from "../ui/Button";
 import EditRoutine from "../Form/EditRoutine";
-import { useSelector, useDispatch } from "react-redux";
-import { openEdit, closeEdit } from "../Form/formSlice";
+import { useDispatch } from "react-redux";
+import { openEdit } from "../Form/formSlice";
+import { setId } from "../Form/formSlice";
 
-function SecInfo({ courseCode, courseName, room, facultyName, sec }) {
+function SecInfo({ cls }) {
   const dispatch = useDispatch();
-  const isEditing = useSelector((state) => state.form.isEditing);
-
   function handleEdit() {
     dispatch(openEdit());
+    dispatch(setId(cls.id));
   }
   return (
     <div className="flex w-full flex-1 items-center justify-between">
       <div className="font-dm-mono flex flex-col gap-1">
         <p className="text-xs text-stone-500 uppercase">
-          {courseCode} - {courseName}
+          {cls.courseCode} - {cls.courseName}
         </p>
         <h2 className="font-dm-sans font-semibold text-stone-700">
-          {facultyName}
+          {cls.facultyName}
         </h2>
         <span className="flex items-center gap-4 uppercase">
           <p className="bg-stone-800 px-3 py-1 text-xs text-stone-50">
-            Sec {sec}
+            Sec {cls.sec}
           </p>
-          <p className="text-xs text-stone-500">Room: {room}</p>
+          <p className="text-xs text-stone-500">Room: {cls.room}</p>
         </span>
       </div>
       <div className="flex items-center gap-4">
