@@ -1,4 +1,6 @@
+import { useSelector } from "react-redux";
 import Details from "./features/course/Details";
+import EditRoutine from "./features/Form/EditRoutine";
 
 const scheduleDetails = [
   {
@@ -9,6 +11,7 @@ const scheduleDetails = [
         endTime: "09:50",
         courseName: "Software Engineering",
         courseCode: "CSE 3421",
+        room: "403",
         facultyName: "Syed Abu Ammar Muhammad Zarif",
         sec: "A",
       },
@@ -17,6 +20,7 @@ const scheduleDetails = [
         endTime: "11:10",
         courseName: "Artificial Intelligence",
         courseCode: "CSE 3811",
+        room: "403",
         facultyName: "Shihab Ahmed",
         sec: "B",
       },
@@ -25,6 +29,7 @@ const scheduleDetails = [
         endTime: "13:40",
         courseName: "Software Engineering Laboratory",
         courseCode: "CSE 3422",
+        room: "403",
         facultyName: "Saifullah Mahbub",
         sec: "B",
       },
@@ -38,6 +43,7 @@ const scheduleDetails = [
         endTime: "11:00",
         courseName: "Computer Networks Laboratory",
         courseCode: "CSE 3712",
+        room: "403",
         facultyName: "Abdullah Ibne Masud Mahi",
         sec: "A",
       },
@@ -46,6 +52,7 @@ const scheduleDetails = [
         endTime: "15:10",
         courseName: "Computer Networks",
         courseCode: "CSE 3711",
+        room: "403",
         facultyName: "Mohammad Mamun Elahi",
         sec: "J",
       },
@@ -63,6 +70,7 @@ const scheduleDetails = [
         endTime: "09:50",
         courseName: "Software Engineering",
         courseCode: "CSE 3421",
+        room: "403",
         facultyName: "Syed Abu Ammar Muhammad Zarif",
         sec: "A",
       },
@@ -71,6 +79,7 @@ const scheduleDetails = [
         endTime: "11:10",
         courseName: "Artificial Intelligence",
         courseCode: "CSE 3811",
+        room: "403",
         facultyName: "Shihab Ahmed",
         sec: "B",
       },
@@ -84,6 +93,7 @@ const scheduleDetails = [
         endTime: "13:40",
         courseName: "Artificial Intelligence Laboratory",
         courseCode: "CSE 3712",
+        room: "403",
         facultyName: "Khandokar Md. Rahat Hossain",
         sec: "K",
       },
@@ -92,6 +102,7 @@ const scheduleDetails = [
         endTime: "15:10",
         courseName: "Computer Networks",
         courseCode: "CSE 3711",
+        room: "403",
         facultyName: "Mohammad Mamun Elahi",
         sec: "J",
       },
@@ -106,13 +117,18 @@ const scheduleDetails = [
   //   classes: [], //OFF
   // },
 ];
+
 function App() {
+  const isEditing = useSelector((state) => state.form.isEditing);
   return (
-    <div className="flex flex-col items-center p-4 border max-w-dvw max-h-dvh overflow-scroll">
-      {scheduleDetails.map((item) => (
-        <Details day={item.day} classes={item.classes} key={item.day} />
-      ))}
-    </div>
+    <>
+      {isEditing && <EditRoutine />}
+      <div className="grid max-h-dvh max-w-dvw grid-cols-1 gap-6 overflow-scroll border p-4 md:grid-cols-2">
+        {scheduleDetails.map((item) => (
+          <Details day={item.day} classes={item.classes} key={item.day} />
+        ))}
+      </div>
+    </>
   );
 }
 

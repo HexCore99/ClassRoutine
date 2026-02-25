@@ -7,17 +7,19 @@ function TimeAndFac({
   facultyName,
   courseCode,
   courseName,
+  room,
   sec,
 }) {
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center w-full space-y-4 md:space-y-0 md:space-x-10 py-4 px-4 border-b last:border-0 border-gray-100 ">
+    <div className="flex w-full flex-col items-start space-y-4 border-b border-gray-100 px-4 py-4 last:border-0 md:flex-row md:items-center md:space-y-0 md:space-x-10">
       <Time startTime={startTime} endTime={endTime} />
-      <span className="w-px h-12 bg-gray-300 hidden md:block"></span>
+      <span className="hidden h-12 w-px bg-gray-300 md:block"></span>
       <SecInfo
         facultyName={facultyName}
         courseCode={courseCode}
         courseName={courseName}
         sec={sec}
+        room={room}
       />
     </div>
   );

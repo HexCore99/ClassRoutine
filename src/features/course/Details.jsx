@@ -1,17 +1,16 @@
 import Day from "../day/Day";
-import SecInfo from "./SecInfo";
-import Time from "./Time";
 import TimeAndFac from "./TimeAndFac";
+import { SquarePen } from "lucide-react";
 
 function Details({ day, classes }) {
   console.log(classes);
   return (
-    <div className="flex flex-col md:flex-row items-center  bg-white border shadow-sm rounded-xl p-3 w-full md:w-full md:gap-5 max-w-4xl mb-4">
-      <div className="text-3xl font-bold text-gray-800 text-center md:text-left mb-4 md:mb-0 md:ml-10">
+    <div className="mx-auto flex h-full w-full max-w-2xl flex-col items-center rounded-xl border bg-white p-3 shadow-sm md:flex-row md:gap-5">
+      <div className="mb-4 text-center text-3xl font-bold text-gray-800 md:mb-0 md:ml-5 md:-rotate-90 md:text-left">
         <Day day={day} />
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex w-full flex-col gap-3">
         {classes.map((cls) => (
           <TimeAndFac
             startTime={cls.startTime}
@@ -20,6 +19,7 @@ function Details({ day, classes }) {
             courseCode={cls.courseCode}
             courseName={cls.courseName}
             sec={cls.sec}
+            room={cls.room}
           />
         ))}
       </div>
