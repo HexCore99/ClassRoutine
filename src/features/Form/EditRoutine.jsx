@@ -4,22 +4,21 @@ import Hr from "../ui/Hr";
 import Input from "./Input";
 import { useDispatch, useSelector } from "react-redux";
 import { setId, selectClassBlockId, closeEdit } from "./formSlice";
-import { selectScheduleDetails } from "../course/courseSlice";
+import {
+  fetchRoutine,
+  selectScheduleDetails,
+  updateRoutine,
+} from "../course/courseSlice";
+import { useState } from "react";
 
 function EditRoutine() {
   const dispatch = useDispatch();
-  function handleCloseForm(e) {
-    e.preventDefault();
-    dispatch(closeEdit());
-    dispatch(setId(null));
-  }
 
   const classBlockId = useSelector(selectClassBlockId);
   const scheduleDetails = useSelector(selectScheduleDetails);
   const selectedClass = scheduleDetails
     .flatMap((dayItem) => dayItem.classes)
     .find((cls) => cls.id === classBlockId);
-  console.log(selectedClass);
 
   const {
     startTime = "",
@@ -31,9 +30,87 @@ function EditRoutine() {
     sec = "",
   } = selectedClass || {};
 
+  const [start_time, set_start_time] = useState(startTime);
+  const [end_time, set_end_time] = useState(endTime);
+  const [course_name, set_course_name] = useState(courseName);
+  const [course_code, set_course_code] = useState(courseCode);
+  const [room_number, set_room_number] = useState(room);
+  const [faculty_name, set_faculty_name] = useState(facultyName);
+  const [sec_name, set_sec_name] = useState(sec);
+
+  function handleCloseForm(e) {
+    e.preventDefault();
+    dispatch(closeEdit());
+    dispatch(setId(null));
+  }
+
+  function checkTime(start, end) {
+    // 8:10 is also valid. check later
+    const time24h = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+    if (!time24h.test(start) || !time24h.test(end)) {
+      return {
+        ok: false,
+        message: "Use 24-hour format HH:MM (example: 08:30).",
+      };
+    }
+
+    const toMinutes = (t) => {
+      const [h, m] = t.split(":").map(Number);
+      return h * 60 + m;
+    };
+
+    if (toMinutes(start) >= toMinutes(end)) {
+      return { ok: false, message: "End time must be later than start time." };
+    }
+
+    return { ok: true, message: "" };
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+
+    console.log("SUBMIT FIRED");
+    const timeStatus = checkTime(start_time.trim(), end_time.trim());
+    if (!timeStatus.ok) {
+      alert(timeStatus.message);
+      return;
+    }
+
+    if (classBlockId == null) {
+      alert("No class selected.");
+      return;
+    }
+
+    const payload = {
+      id: classBlockId,
+      start_time: start_time.trim(),
+      end_time: end_time.trim(),
+      course_name,
+      course_code,
+      faculty_name,
+      sec: sec_name,
+      room: room_number,
+    };
+
+    try {
+      await dispatch(updateRoutine(payload)).unwrap();
+      dispatch(closeEdit());
+      dispatch(setId(null));
+      dispatch(fetchRoutine());
+    } catch (err) {
+      alert(err || "Failed to update class.");
+    }
+
+    console.log("save payload", payload);
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex h-dvh w-dvw items-center justify-center bg-black/30 backdrop-blur-sm">
-      <form className="h-[90%] w-2/4 overflow-scroll rounded-md bg-white p-5">
+      <form
+        onSubmit={handleSave}
+        className="h-fit w-fit overflow-scroll rounded-md bg-white px-6 py-5"
+      >
         <div className="flex items-center justify-between">
           <h1 className="w-fit text-2xl font-bold uppercase">Edit Class</h1>
 
@@ -47,25 +124,60 @@ function EditRoutine() {
 
         <Hr value="time" />
         <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
-          <Input defaultValue={startTime} value="Start Time" />
-          <Input defaultValue={endTime} value="End Time" />
+          <Input
+            value={start_time}
+            label="Start Time"
+            id="start-time"
+            onChange={set_start_time}
+          />
+          <Input
+            value={end_time}
+            label="End Time"
+            id="end-time"
+            onChange={set_end_time}
+          />
         </div>
 
         <Hr value="Course" />
         <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
-          <Input defaultValue={courseCode} value="Course Code" />
-          <Input defaultValue={courseName} value="Course Name" />
+          <Input
+            value={course_code}
+            label="Course Code"
+            id="course-code"
+            onChange={set_course_code}
+          />
+          <Input
+            value={course_name}
+            label="Course Name"
+            id="course-name"
+            onChange={set_course_name}
+          />
         </div>
 
         <Hr value="Details" />
 
         <div className="flex flex-col items-center gap-2 md:flex-row">
-          <Input defaultValue={facultyName} value="Faculty Name" />
+          <Input
+            value={faculty_name}
+            label="Faculty Name"
+            id="fac-name"
+            onChange={set_faculty_name}
+          />
         </div>
 
         <div className="mt-5 flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
-          <Input defaultValue={sec} value="Section" />
-          <Input defaultValue={room} value="Room Number" />
+          <Input
+            value={sec_name}
+            label="Section"
+            id="sec"
+            onChange={set_sec_name}
+          />
+          <Input
+            value={room_number}
+            label="Room Number"
+            id="room-number"
+            onChange={set_room_number}
+          />
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-2 md:justify-end">
@@ -75,7 +187,9 @@ function EditRoutine() {
           >
             Cancel
           </Button>
-          <Button style="border-0 bg-slate-900 text-white">Save</Button>
+          <Button style="border-0 bg-slate-900 text-white" type="submit">
+            Save
+          </Button>
         </div>
       </form>
     </div>

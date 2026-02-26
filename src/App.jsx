@@ -20,8 +20,9 @@ function App() {
     if (status === "idle") dispatch(fetchRoutine());
   }, [dispatch, status]);
 
-  if (status === "loading") return <p className="p-4"> Loading routine.....</p>;
-  if (status === "error") return <p className="p-4 text-red-600">{error}</p>;
+  if (status === "loading" && scheduleDetails.length === 0)
+    return <p className="p-4"> Loading routine.....</p>;
+  if (status === "failed") return <p className="p-4 text-red-600">{error}</p>;
 
   return (
     <>

@@ -40,6 +40,26 @@ export const fetchRoutine = createAsyncThunk(
   },
 );
 
+export const updateRoutine = createAsyncThunk(
+  "course/updateRoutine",
+  async (payload, { rejectWithValue }) => {
+    const { id, ...updates } = payload;
+    const { data, error } = await supabase
+      .from("routine_classes")
+      .update(updates)
+      .eq("id", id)
+      .select("id");
+
+    if (error) return rejectWithValue(error.message);
+    if (!data || data.length === 0) {
+      return rejectWithValue(
+        "No row updated. Check RLS policy or selected id.",
+      );
+    }
+    return { id, ...updates };
+  },
+);
+
 const initialState = {
   scheduleDetails: [],
   status: "idle",
@@ -64,6 +84,23 @@ const courseSlice = createSlice({
       .addCase(fetchRoutine.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || action.error.message;
+      })
+      .addCase(updateRoutine.fulfilled, (state, action) => {
+        const updated = action.payload;
+
+        for (const day of state.scheduleDetails) {
+          const cls = day.classes.find((item) => item.id === updated.id);
+          if (!cls) continue;
+
+          cls.startTime = formatTime(updated.start_time);
+          cls.endTime = formatTime(updated.end_time);
+          cls.courseName = updated.course_name;
+          cls.courseCode = updated.course_code;
+          cls.facultyName = updated.faculty_name;
+          cls.sec = updated.sec;
+          cls.room = updated.room;
+          break;
+        }
       });
   },
 });
