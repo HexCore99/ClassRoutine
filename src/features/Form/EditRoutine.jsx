@@ -3,17 +3,20 @@ import Button from "../ui/Button";
 import Hr from "../ui/Hr";
 import Input from "./Input";
 import { useDispatch, useSelector } from "react-redux";
-import { setId, selectClassBlockId, closeEdit } from "./formSlice";
+import { setId, selectClassBlockId, closeEdit, selectMode } from "./formSlice";
 import {
   fetchRoutine,
   selectScheduleDetails,
   updateRoutine,
+  addNewCourse,
 } from "../course/courseSlice";
 import { useState } from "react";
+import DaySelector from "./DaySelector";
 
 function EditRoutine() {
   const dispatch = useDispatch();
 
+  const mode = useSelector(selectMode);
   const classBlockId = useSelector(selectClassBlockId);
   const scheduleDetails = useSelector(selectScheduleDetails);
   const selectedClass = scheduleDetails
@@ -28,6 +31,7 @@ function EditRoutine() {
     room = "",
     facultyName = "",
     sec = "",
+    day = "",
   } = selectedClass || {};
 
   const [start_time, set_start_time] = useState(startTime);
@@ -37,6 +41,7 @@ function EditRoutine() {
   const [room_number, set_room_number] = useState(room);
   const [faculty_name, set_faculty_name] = useState(facultyName);
   const [sec_name, set_sec_name] = useState(sec);
+  const [selected_day, set_selected_day] = useState(day);
 
   function handleCloseForm(e) {
     e.preventDefault();
@@ -71,13 +76,17 @@ function EditRoutine() {
     e.preventDefault();
 
     console.log("SUBMIT FIRED");
+    if (!selected_day) {
+      alert("Please select a day.");
+      return;
+    }
     const timeStatus = checkTime(start_time.trim(), end_time.trim());
     if (!timeStatus.ok) {
       alert(timeStatus.message);
       return;
     }
 
-    if (classBlockId == null) {
+    if (classBlockId == null && mode === "edit") {
       alert("No class selected.");
       return;
     }
@@ -91,15 +100,18 @@ function EditRoutine() {
       faculty_name,
       sec: sec_name,
       room: room_number,
+      day: selected_day,
     };
 
     try {
-      await dispatch(updateRoutine(payload)).unwrap();
+      if (mode === "edit") await dispatch(updateRoutine(payload)).unwrap();
+      else await dispatch(addNewCourse(payload)).unwrap();
+
       dispatch(closeEdit());
       dispatch(setId(null));
       dispatch(fetchRoutine());
     } catch (err) {
-      alert(err || "Failed to update class.");
+      alert(err || `Failed to ${mode === "edit" ? "update" : "add"} class.`);
     }
 
     console.log("save payload", payload);
@@ -112,7 +124,9 @@ function EditRoutine() {
         className="h-fit w-fit overflow-scroll rounded-md bg-white px-6 py-5"
       >
         <div className="flex items-center justify-between">
-          <h1 className="w-fit text-2xl font-bold uppercase">Edit Class</h1>
+          <h1 className="w-fit text-2xl font-bold uppercase">
+            {mode === "edit" ? "Edit Class" : "Add New Class"}
+          </h1>
 
           <Button
             style="border border-slate-300 px-1 py-1 text-xs"
@@ -121,6 +135,12 @@ function EditRoutine() {
             ❌
           </Button>
         </div>
+
+        <Hr value="Day" />
+        <DaySelector
+          selectedDay={selected_day}
+          onDayChange={set_selected_day}
+        />
 
         <Hr value="time" />
         <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">

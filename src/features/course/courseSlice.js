@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import supabase from "../../lib/supabase";
+import { act } from "react";
 const DAY_ORDER = ["SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"];
 function formatTime(value) {
   return value?.slice(0, 5) ?? "";
@@ -60,6 +61,42 @@ export const updateRoutine = createAsyncThunk(
   },
 );
 
+export const addNewCourse = createAsyncThunk(
+  "course/addNewCourse",
+  async (payload, { rejectWithValue }) => {
+    const { id, ...updates } = payload;
+    const { data, error } = await supabase
+      .from("routine_classes")
+      .insert(updates)
+      .select("*");
+
+    if (error) return rejectWithValue(error.message);
+    if (!data || data.length === 0) {
+      return rejectWithValue(
+        "No row updated. Check RLS policy or selected id.",
+      );
+    }
+    return data;
+  },
+);
+
+export const removeCourse = createAsyncThunk(
+  "course/removeCourse",
+  async ({ id }, { rejectWithValue }) => {
+    const { data, error } = await supabase
+      .from("routine_classes")
+      .delete()
+      .eq("id", id)
+      .select();
+
+    if (error) return rejectWithValue(error.message);
+    if (!data || data.length === 0) {
+      return rejectWithValue("No row deleted. check if the ID exists");
+    }
+    return { id };
+  },
+);
+
 const initialState = {
   scheduleDetails: [],
   status: "idle",
@@ -101,6 +138,24 @@ const courseSlice = createSlice({
           cls.room = updated.room;
           break;
         }
+      })
+      .addCase(addNewCourse.fulfilled, (state, action) => {
+        console.log("course added succesfully", action.payload);
+      })
+      .addCase(removeCourse.fulfilled, (state, action) => {
+        const deletedId = action.payload.id;
+
+        for (const day of state.scheduleDetails) {
+          const index = day.classes.findIndex((item) => item.id === deletedId);
+          if (index !== -1) {
+            day.classes.splice(index, 1);
+            break;
+          }
+        }
+
+        state.scheduleDetails = state.scheduleDetails.filter(
+          (day) => day.classes.length > 0,
+        );
       });
   },
 });
