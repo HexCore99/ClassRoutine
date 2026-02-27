@@ -5,7 +5,10 @@ function LogoutButton() {
   const navigate = useNavigate();
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
-    if (error) alert(error);
+    if (error) {
+      alert(error.message);
+      return;
+    }
     navigate("/login", { replace: true });
   }
   return (

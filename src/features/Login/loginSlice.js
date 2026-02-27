@@ -14,10 +14,11 @@ const initialState = {
 
 export const sendVerificationCode = createAsyncThunk(
   "login/sendVerificationCode",
-  async ({ fullName, email }, { rejectWithValue }) => {
-    const cleanName = fullName.trim();
+  // async ({ fullName, email }, { rejectWithValue }) => {
+  async ({ email }, { rejectWithValue }) => {
+    // const cleanName = fullName.trim();
     const cleanEmail = email.trim().toLowerCase();
-    if (!cleanName) return rejectWithValue("Full name is required");
+    // if (!cleanName) return rejectWithValue("Full name is required");
 
     if (!cleanEmail) return rejectWithValue("Email is required");
 
@@ -25,19 +26,21 @@ export const sendVerificationCode = createAsyncThunk(
       email: cleanEmail,
       options: {
         shouldCreateUser: true,
-        data: { full_name: cleanName },
+        // data: { full_name: cleanName },
       },
     });
 
     if (error) return rejectWithValue(error.message);
-    return { fullName: cleanName, email: cleanEmail };
+    // return { fullName: cleanName, email: cleanEmail };
+    return { email: cleanEmail };
   },
 );
 
 export const verifyEmailCode = createAsyncThunk(
   "login/verifyEmailCode",
   async ({ otp }, { getState, rejectWithValue }) => {
-    const { email, fullName } = getState().login;
+    // const { email, fullName } = getState().login;
+    const { email } = getState().login;
     const token = otp.trim();
     if (!token) return rejectWithValue("Verification code is required");
     const { data, error } = await supabase.auth.verifyOtp({
@@ -53,7 +56,7 @@ export const verifyEmailCode = createAsyncThunk(
       {
         id: userId,
         email,
-        full_name: fullName,
+        full_name: "",
         updated_at: new Date().toISOString(),
       },
       { onConflict: "id" },
@@ -75,6 +78,12 @@ const loginSlice = createSlice({
     clearAuthSession(state) {
       state.user = null;
       state.authChecked = true;
+      state.fullName = "";
+      state.email = "";
+      state.step = "credentials";
+      state.status = "idle";
+      state.verifyStatus = "idle";
+      state.err = "";
     },
   },
   extraReducers: (builder) => {
@@ -85,7 +94,8 @@ const loginSlice = createSlice({
       .addCase(sendVerificationCode.fulfilled, (state, action) => {
         state.status = "succeded";
         state.step = "verification";
-        state.fullName = action.payload.fullName;
+        // state.fullName = action.payload.fullName;
+        state.fullName = "";
         state.email = action.payload.email;
       })
       .addCase(sendVerificationCode.rejected, (state, action) => {

@@ -7,7 +7,7 @@ import { selectLogin, sendVerificationCode } from "./loginSlice";
 import { useNavigate } from "react-router-dom";
 
 function Credentials() {
-  const [name, setName] = useState("");
+  // const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
   const { status, err } = useSelector(selectLogin);
@@ -22,7 +22,8 @@ function Credentials() {
     }
 
     try {
-      await dispatch(sendVerificationCode({ fullName: name, email })).unwrap();
+      // await dispatch(sendVerificationCode({ fullName: name, email })).unwrap();
+      await dispatch(sendVerificationCode({ email })).unwrap();
       navigate("/verification");
     } catch (err) {
       console.log(err);
@@ -39,12 +40,12 @@ function Credentials() {
       <div className="space-y-6 p-8">
         {err && <Error role="alert" err={err} />}
 
-        <Input
+        {/* <Input
           label="Full Name"
           placeholder="Enter your full name"
           value={name}
           onChange={setName}
-        />
+        /> */}
         <Input
           label="Email Address"
           type="email"
