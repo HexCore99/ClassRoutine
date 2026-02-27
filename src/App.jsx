@@ -1,9 +1,16 @@
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import Login from "./features/Login/Login";
 import Credentials from "./features/Login/Credentials";
 
-import Verification from "./features/Login/Verification";
 import RoutinePage from "./features/course/RoutinePage";
+import VerificationGuard from "./features/Login/VerificationGuard";
+import ProtectedRoute from "./features/Login/ProtectedRoute";
+import AuthSync from "./features/Login/AuthSync";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -13,16 +20,25 @@ const router = createBrowserRouter([
     element: <Login />,
     children: [
       { path: "/login", element: <Credentials /> },
-      { path: "/verification", element: <Verification /> },
+      { path: "/verification", element: <VerificationGuard /> },
     ],
   },
   {
     path: "/routine",
-    element: <RoutinePage />,
+    element: (
+      <ProtectedRoute>
+        <RoutinePage />
+      </ProtectedRoute>
+    ),
   },
 ]);
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <AuthSync />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

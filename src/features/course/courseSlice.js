@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import supabase from "../../lib/supabase";
-import { act } from "react";
 const DAY_ORDER = ["SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"];
 function formatTime(value) {
   return value?.slice(0, 5) ?? "";
@@ -15,6 +14,7 @@ function groupRows(rows) {
 
     byDay[row.day].classes.push({
       id: row.id,
+      day: row.day,
       startTime: formatTime(row.start_time),
       endTime: formatTime(row.end_time),
       courseName: row.course_name,

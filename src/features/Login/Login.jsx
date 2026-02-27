@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Outlet } from "react-router-dom";
 function Login() {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-gray-50 p-4 font-mono">

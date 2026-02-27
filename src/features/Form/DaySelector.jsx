@@ -12,12 +12,11 @@ function DaySelector({ selectedDay, onDayChange }) {
             key={day}
             type="button"
             onClick={() => onDayChange(day)}
-            style={
+            className={`${
               selectedDay === day
                 ? "bg-gray-900 text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }
-            className="text-sm font-bold"
+            } text-sm font-bold`}
           >
             {day}
           </Button>

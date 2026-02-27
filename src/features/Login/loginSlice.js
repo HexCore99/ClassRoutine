@@ -8,6 +8,8 @@ const initialState = {
   status: "idle",
   verifyStatus: "idle",
   err: "",
+  user: null,
+  authChecked: false, //why it's exists
 };
 
 export const sendVerificationCode = createAsyncThunk(
@@ -64,7 +66,17 @@ export const verifyEmailCode = createAsyncThunk(
 const loginSlice = createSlice({
   name: "login",
   initialState,
-  reducers: {},
+  reducers: {
+    setAuthSession(state, action) {
+      state.user = action.payload?.user ?? null;
+      state.authChecked = true;
+    },
+
+    clearAuthSession(state) {
+      state.user = null;
+      state.authChecked = true;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(sendVerificationCode.pending, (state) => {
@@ -98,4 +110,8 @@ const loginSlice = createSlice({
 export const currState = (state) => state.login.step;
 export const selectEmailAddress = (state) => state.login.email;
 export const selectLogin = (state) => state.login;
+export const selectAuthUser = (state) => state.login.user;
+export const selectAuthChecked = (state) => state.login.authChecked;
+export const selectIsAuthenticated = (state) => Boolean(state.login.user);
+export const { setAuthSession, clearAuthSession } = loginSlice.actions;
 export default loginSlice.reducer;

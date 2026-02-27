@@ -11,6 +11,7 @@ import {
 } from "./courseSlice";
 import { openAdd } from "../Form/formSlice";
 import Button from "../ui/Button";
+import LogoutButton from "../Login/LogoutButton";
 
 function RoutinePage() {
   const isEditing = useSelector((state) => state.form.isEditing);
@@ -42,6 +43,9 @@ function RoutinePage() {
   return (
     <div className="flex flex-col">
       {isEditing && <EditRoutine />}
+      <div className="flex justify-end p-4">
+        <LogoutButton />
+      </div>
       <div className="grid max-h-dvh max-w-dvw grid-cols-1 gap-6 overflow-scroll p-4 md:grid-cols-2">
         {scheduleDetails.map((item) => (
           <Details day={item.day} classes={item.classes} key={item.day} />

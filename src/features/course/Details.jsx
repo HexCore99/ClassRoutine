@@ -11,7 +11,7 @@ function Details({ day, classes }) {
 
       <div className="flex w-full flex-col gap-3">
         {classes.map((cls) => (
-          <TimeAndFac cls={cls} />
+          <TimeAndFac cls={cls} key={cls.id} />
         ))}
       </div>
     </div>

@@ -10,7 +10,7 @@ import {
   updateRoutine,
   addNewCourse,
 } from "../course/courseSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DaySelector from "./DaySelector";
 
 function EditRoutine() {
@@ -118,98 +118,100 @@ function EditRoutine() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex h-dvh w-dvw items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
       <form
         onSubmit={handleSave}
-        className="h-fit w-fit overflow-scroll rounded-md bg-white px-6 py-5"
+        className="flex max-h-[78dvh] w-[82vw] max-w-xs flex-col overflow-hidden rounded-2xl bg-white shadow-xl sm:max-h-[92dvh] sm:w-full sm:max-w-lg"
       >
-        <div className="flex items-center justify-between">
-          <h1 className="w-fit text-2xl font-bold uppercase">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-3 py-2 sm:px-6 sm:py-3">
+          <h1 className="text-lg font-bold uppercase sm:text-2xl">
             {mode === "edit" ? "Edit Class" : "Add New Class"}
           </h1>
 
           <Button
-            style="border border-slate-300 px-1 py-1 text-xs"
+            className="border border-slate-300 px-2 py-1 text-xs"
             onClick={handleCloseForm}
           >
-            ❌
+            ✕
           </Button>
         </div>
 
-        <Hr value="Day" />
-        <DaySelector
-          selectedDay={selected_day}
-          onDayChange={set_selected_day}
-        />
+        <div className="overflow-y-auto px-3 py-3 sm:px-6 sm:py-5">
+          <Hr value="Day" />
+          <DaySelector
+            selectedDay={selected_day}
+            onDayChange={set_selected_day}
+          />
 
-        <Hr value="time" />
-        <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
-          <Input
-            value={start_time}
-            label="Start Time"
-            id="start-time"
-            onChange={set_start_time}
-          />
-          <Input
-            value={end_time}
-            label="End Time"
-            id="end-time"
-            onChange={set_end_time}
-          />
-        </div>
+          <Hr value="time" />
+          <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
+            <Input
+              value={start_time}
+              label="Start Time"
+              id="start-time"
+              onChange={set_start_time}
+            />
+            <Input
+              value={end_time}
+              label="End Time"
+              id="end-time"
+              onChange={set_end_time}
+            />
+          </div>
 
-        <Hr value="Course" />
-        <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
-          <Input
-            value={course_code}
-            label="Course Code"
-            id="course-code"
-            onChange={set_course_code}
-          />
-          <Input
-            value={course_name}
-            label="Course Name"
-            id="course-name"
-            onChange={set_course_name}
-          />
-        </div>
+          <Hr value="Course" />
+          <div className="flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
+            <Input
+              value={course_code}
+              label="Course Code"
+              id="course-code"
+              onChange={set_course_code}
+            />
+            <Input
+              value={course_name}
+              label="Course Name"
+              id="course-name"
+              onChange={set_course_name}
+            />
+          </div>
 
-        <Hr value="Details" />
+          <Hr value="Details" />
 
-        <div className="flex flex-col items-center gap-2 md:flex-row">
-          <Input
-            value={faculty_name}
-            label="Faculty Name"
-            id="fac-name"
-            onChange={set_faculty_name}
-          />
-        </div>
+          <div className="flex flex-col items-center gap-2 md:flex-row">
+            <Input
+              value={faculty_name}
+              label="Faculty Name"
+              id="fac-name"
+              onChange={set_faculty_name}
+            />
+          </div>
 
-        <div className="mt-5 flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
-          <Input
-            value={sec_name}
-            label="Section"
-            id="sec"
-            onChange={set_sec_name}
-          />
-          <Input
-            value={room_number}
-            label="Room Number"
-            id="room-number"
-            onChange={set_room_number}
-          />
-        </div>
+          <div className="mt-5 flex flex-col items-center gap-2 md:flex-row md:justify-between md:gap-5">
+            <Input
+              value={sec_name}
+              label="Section"
+              id="sec"
+              onChange={set_sec_name}
+            />
+            <Input
+              value={room_number}
+              label="Room Number"
+              id="room-number"
+              onChange={set_room_number}
+            />
+          </div>
 
-        <div className="mt-4 flex items-center justify-between gap-2 md:justify-end">
-          <Button
-            style=" border border-gray-300 bg-white text-gray-500"
-            onClick={handleCloseForm}
-          >
-            Cancel
-          </Button>
-          <Button style="border-0 bg-slate-900 text-white" type="submit">
-            Save
-          </Button>
+          <div className="mt-4 flex items-center justify-between gap-2 md:justify-end">
+            <Button
+              className="border border-gray-300 bg-white text-gray-500"
+              onClick={handleCloseForm}
+            >
+              Cancel
+            </Button>
+            <Button className="border-0 bg-slate-900 text-white" type="submit">
+              Save
+            </Button>
+          </div>
         </div>
       </form>
     </div>

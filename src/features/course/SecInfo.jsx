@@ -9,8 +9,8 @@ function SecInfo({ cls }) {
   const dispatch = useDispatch();
 
   function handleEdit() {
-    dispatch(openEdit());
     dispatch(setId(cls.id));
+    dispatch(openEdit());
   }
 
   function handleDelete() {
