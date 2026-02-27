@@ -1,10 +1,5 @@
-import Credentials from "./Credentials";
-import Verification from "./Verification";
-import { useDispatch, useSelector } from "react-redux";
-import { currState } from "./loginSlice";
-const log = false;
+import { Outlet } from "react-router";
 function Login() {
-  const currPage = useSelector(currState);
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-gray-50 p-4 font-mono">
       {/* Background Pattern */}
@@ -17,8 +12,7 @@ function Login() {
           }}
         />
       </div>
-
-      {currPage === "verification" ? <Verification /> : <Credentials />}
+      <Outlet />
     </div>
   );
 

@@ -4,16 +4,20 @@ import Button from "../ui/Button";
 import { selectEmailAddress } from "./loginSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { verifyEmailCode } from "./loginSlice";
+import { useNavigate } from "react-router-dom";
 
 function Verification() {
   const dispatch = useDispatch();
   const email = useSelector(selectEmailAddress);
   const [otp, setOtp] = useState("");
-
-  function handleVerification() {
-    const data = dispatch(verifyEmailCode(otp)).unwrap();
-    if (!data) alert("enter verified code");
-    // routing part.
+  const navigate = useNavigate();
+  async function handleVerification() {
+    try {
+      await dispatch(verifyEmailCode({ otp })).unwrap();
+      navigate("/routine");
+    } catch (err) {
+      alert(err || "verification failed");
+    }
   }
   return (
     <div className="relative z-10 m-auto w-full max-w-md overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">

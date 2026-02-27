@@ -19,7 +19,7 @@ export const sendVerificationCode = createAsyncThunk(
 
     if (!cleanEmail) return rejectWithValue("Email is required");
 
-    const { error } = supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email: cleanEmail,
       options: {
         shouldCreateUser: true,
@@ -43,7 +43,7 @@ export const verifyEmailCode = createAsyncThunk(
       token,
       type: "email",
     });
-    if (error) rejectWithValue(error.message);
+    if (error) return rejectWithValue(error.message);
     const userId = data.user?.id;
     if (!userId) return rejectWithValue("No user id after verification");
 

@@ -4,16 +4,29 @@ import Button from "../ui/Button";
 import Error from "./Error";
 import { useDispatch, useSelector } from "react-redux";
 import { selectLogin, sendVerificationCode } from "./loginSlice";
+import { useNavigate } from "react-router-dom";
 
 function Credentials() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
   const { status, err } = useSelector(selectLogin);
+  const navigate = useNavigate();
 
   async function handleSendVerification() {
     if (status === "loading") return;
-    await dispatch(sendVerificationCode({ fullName: name, email }));
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      alert("please enter a valid email address");
+      return;
+    }
+
+    try {
+      await dispatch(sendVerificationCode({ fullName: name, email })).unwrap();
+      navigate("/verification");
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -24,7 +37,7 @@ function Credentials() {
         </p>
       </div>
       <div className="space-y-6 p-8">
-        {err && <Error role="alert" />}
+        {err && <Error role="alert" err={err} />}
 
         <Input
           label="Full Name"

@@ -65,9 +65,12 @@ export const addNewCourse = createAsyncThunk(
   "course/addNewCourse",
   async (payload, { rejectWithValue }) => {
     const { id, ...updates } = payload;
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError) return rejectWithValue(authError.message);
+    if (!authData.user) return rejectWithValue("You mus be logged in");
     const { data, error } = await supabase
       .from("routine_classes")
-      .insert(updates)
+      .insert({ ...updates, user_id: authData.user.id })
       .select("*");
 
     if (error) return rejectWithValue(error.message);
