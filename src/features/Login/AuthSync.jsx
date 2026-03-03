@@ -1,38 +1,31 @@
 import { useDispatch } from "react-redux";
-import { clearAuthSession, setAuthSession } from "./loginSlice";
 import { useEffect } from "react";
-import supabase from "../../lib/supabase";
+import { clearAuthSession, setAuthSession } from "./loginSlice";
 function AuthSync() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    let isMounted = true;
+    async function checkAuth() {
+      try {
+        const res = await fetch("http://localhost:5000/api/auth/me", {
+          credentials: "include",
+        });
 
-    async function loadSession() {
-      const { data, error } = await supabase.auth.getSession();
-      if (!isMounted) return;
-      if (error || !data.session) {
+        if (!res.ok) {
+          dispatch(clearAuthSession());
+          return;
+        }
+
+        const data = await res.json();
+        dispatch(setAuthSession({ user: data.user }));
+      } catch (err) {
         dispatch(clearAuthSession());
-        return;
       }
-      dispatch(setAuthSession(data.session));
-      return;
     }
 
-    loadSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (session) dispatch(setAuthSession(session));
-        else dispatch(clearAuthSession());
-      },
-    );
-
-    return () => {
-      isMounted = false;
-      listener.subscription.unsubscribe();
-    };
+    checkAuth();
   }, [dispatch]);
+
   return null;
 }
 

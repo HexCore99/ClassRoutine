@@ -5,9 +5,9 @@ import {
 } from "react-router-dom";
 import Login from "./features/Login/Login";
 import Credentials from "./features/Login/Credentials";
+import Signup from "./features/Signup/Signup";
 
 import RoutinePage from "./features/course/RoutinePage";
-import VerificationGuard from "./features/Login/VerificationGuard";
 import ProtectedRoute from "./features/Login/ProtectedRoute";
 import AuthSync from "./features/Login/AuthSync";
 
@@ -20,7 +20,7 @@ const router = createBrowserRouter([
     element: <Login />,
     children: [
       { path: "/login", element: <Credentials /> },
-      { path: "/verification", element: <VerificationGuard /> },
+      { path: "/signup", element: <Signup /> },
     ],
   },
   {

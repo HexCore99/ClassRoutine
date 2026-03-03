@@ -1,4 +1,3 @@
-import { useDebugValue, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Details from "./Details";
 import EditRoutine from "../Form/EditRoutine";
@@ -12,10 +11,13 @@ import {
 import { openAdd } from "../Form/formSlice";
 import Button from "../ui/Button";
 import LogoutButton from "../Login/LogoutButton";
+import { useEffect } from "react";
+import { selectLoginUser } from "../Login/loginSlice";
 
 function RoutinePage() {
   const isEditing = useSelector((state) => state.form.isEditing);
   const dispatch = useDispatch();
+  const user = useSelector(selectLoginUser);
   const scheduleDetails = useSelector(selectScheduleDetails);
   const status = useSelector(selectCourseStatus);
   const error = useSelector(selectCourseError);

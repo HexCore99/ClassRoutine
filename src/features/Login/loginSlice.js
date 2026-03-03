@@ -1,68 +1,25 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import supabase from "../../lib/supabase";
 
 const initialState = {
-  fullName: "",
   email: "",
-  step: "credentials",
   status: "idle",
-  verifyStatus: "idle",
   err: "",
   user: null,
   authChecked: false, //why it's exists
 };
 
-export const sendVerificationCode = createAsyncThunk(
-  "login/sendVerificationCode",
-  // async ({ fullName, email }, { rejectWithValue }) => {
-  async ({ email }, { rejectWithValue }) => {
-    // const cleanName = fullName.trim();
-    const cleanEmail = email.trim().toLowerCase();
-    // if (!cleanName) return rejectWithValue("Full name is required");
-
-    if (!cleanEmail) return rejectWithValue("Email is required");
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: cleanEmail,
-      options: {
-        shouldCreateUser: true,
-        // data: { full_name: cleanName },
-      },
+export const loginUser = createAsyncThunk(
+  "login/loginUser",
+  async ({ email, password }, { rejectWithValue }) => {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
     });
-
-    if (error) return rejectWithValue(error.message);
-    // return { fullName: cleanName, email: cleanEmail };
-    return { email: cleanEmail };
-  },
-);
-
-export const verifyEmailCode = createAsyncThunk(
-  "login/verifyEmailCode",
-  async ({ otp }, { getState, rejectWithValue }) => {
-    // const { email, fullName } = getState().login;
-    const { email } = getState().login;
-    const token = otp.trim();
-    if (!token) return rejectWithValue("Verification code is required");
-    const { data, error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: "email",
-    });
-    if (error) return rejectWithValue(error.message);
-    const userId = data.user?.id;
-    if (!userId) return rejectWithValue("No user id after verification");
-
-    const { error: profileError } = await supabase.from("users").upsert(
-      {
-        id: userId,
-        email,
-        full_name: "",
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "id" },
-    );
-    if (profileError) return rejectWithValue(profileError.message);
-    return { userId };
+    const data = await res.json();
+    if (!res.ok) return rejectWithValue(data.message);
+    return data.user;
   },
 );
 
@@ -78,49 +35,33 @@ const loginSlice = createSlice({
     clearAuthSession(state) {
       state.user = null;
       state.authChecked = true;
-      state.fullName = "";
       state.email = "";
-      state.step = "credentials";
       state.status = "idle";
-      state.verifyStatus = "idle";
       state.err = "";
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(sendVerificationCode.pending, (state) => {
-        ((state.status = "loading"), (state.err = null));
+      .addCase(loginUser.pending, (state) => {
+        state.status = "loading";
+        state.err = "";
       })
-      .addCase(sendVerificationCode.fulfilled, (state, action) => {
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.status = "succeded";
-        state.step = "verification";
-        // state.fullName = action.payload.fullName;
-        state.fullName = "";
-        state.email = action.payload.email;
+        state.user = action.payload;
+        state.authChecked = true;
       })
-      .addCase(sendVerificationCode.rejected, (state, action) => {
-        ((state.status = "failed"),
-          (state.err = action.payload || action.error.message));
-      })
-      .addCase(verifyEmailCode.pending, (state) => {
-        state.verifyStatus = "loading";
-        state.err = null;
-      })
-      .addCase(verifyEmailCode.fulfilled, (state, action) => {
-        state.verifyStatus = "succeded";
-        state.step = "done";
-      })
-      .addCase(verifyEmailCode.rejected, (state, action) => {
-        state.verifyStatus = "failed";
+      .addCase(loginUser.rejected, (state, action) => {
+        state.status = "failed";
         state.err = action.payload || action.error.message;
+        state.authChecked = true;
       });
   },
 });
 
-export const currState = (state) => state.login.step;
+export const selectLoginUser = (state) => state.login.user;
 export const selectEmailAddress = (state) => state.login.email;
 export const selectLogin = (state) => state.login;
-export const selectAuthUser = (state) => state.login.user;
 export const selectAuthChecked = (state) => state.login.authChecked;
 export const selectIsAuthenticated = (state) => Boolean(state.login.user);
 export const { setAuthSession, clearAuthSession } = loginSlice.actions;

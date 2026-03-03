@@ -13,13 +13,18 @@ function SecInfo({ cls }) {
     dispatch(openEdit());
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${cls.courseName}?`,
     );
 
-    if (confirmDelete) {
-      dispatch(removeCourse({ id: cls.id }));
+    if (!confirmDelete) {
+      return;
+    }
+    try {
+      await dispatch(removeCourse({ id: cls.id })).unwrap();
+    } catch (err) {
+      alert(typeof err === "string" ? err : "Failed to delete course");
     }
   }
   return (

@@ -1,14 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import supabase from "../../lib/supabase";
+import { clearAuthSession } from "./loginSlice";
 import Button from "../ui/Button";
+import { useDispatch } from "react-redux";
 function LogoutButton() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      alert(error.message);
-      return;
-    }
+    await fetch("http://localhost:5000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    dispatch(clearAuthSession());
+
     navigate("/login", { replace: true });
   }
   return (

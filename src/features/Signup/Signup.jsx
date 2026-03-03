@@ -1,21 +1,20 @@
 import { useState } from "react";
 import Input from "../Form/Input";
 import Button from "../ui/Button";
-import Error from "./Error";
+import Error from "../Login/Error";
 import { useDispatch, useSelector } from "react-redux";
-import { selectLogin } from "./loginSlice";
+import { selectSignedUp } from "./signupslice";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "./loginSlice";
+import { signupUser } from "./signupSlice";
 
-function Credentials() {
-  // const [name, setName] = useState("");
+function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
-  const { status, err } = useSelector(selectLogin);
+  const { status, err } = useSelector(selectSignedUp);
   const navigate = useNavigate();
 
-  async function handleLogin() {
+  async function handleSignUp() {
     if (status === "loading") return;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,8 +24,9 @@ function Credentials() {
     }
 
     try {
-      await dispatch(loginUser({ email: email.trim(), password })).unwrap();
-      navigate("/routine");
+      console.log(email, password);
+      await dispatch(signupUser({ email: email.trim(), password })).unwrap();
+      navigate("/login");
     } catch (err) {
       console.log(err);
     }
@@ -41,6 +41,7 @@ function Credentials() {
       </div>
       <div className="space-y-6 p-8">
         {err && <Error role="alert" err={err} />}
+
         <Input
           label="Email Address"
           type="email"
@@ -48,6 +49,7 @@ function Credentials() {
           value={email}
           onChange={setEmail}
         />
+
         <Input
           label="Password"
           type="password"
@@ -55,16 +57,17 @@ function Credentials() {
           value={password}
           onChange={setPassword}
         />
+
         <Button
           className="w-full bg-linear-to-r from-green-600 to-green-500 text-white uppercase"
-          onClick={handleLogin}
+          onClick={handleSignUp}
         >
-          Login
+          Sign Up
         </Button>
+
         <p className="text-center text-sm text-gray-600">
-          Don't have an account?
-          <Link to="/signup" className="font-semibold text-green-600">
-            Sign Up
+          <Link to="/login" className="font-semibold text-green-600">
+            Login
           </Link>
         </p>
       </div>
@@ -72,4 +75,4 @@ function Credentials() {
   );
 }
 
-export default Credentials;
+export default Signup;

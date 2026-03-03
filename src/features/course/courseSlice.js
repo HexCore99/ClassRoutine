@@ -1,10 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import supabase from "../../lib/supabase";
 const DAY_ORDER = ["SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"];
 function formatTime(value) {
   return value?.slice(0, 5) ?? "";
 }
-
+const localhost = "http://localhost:5000/api";
 function groupRows(rows) {
   const groupped = DAY_ORDER.map((day) => ({ day: day, classes: [] }));
   const byDay = Object.fromEntries(groupped.map((item) => [item.day, item]));
@@ -30,73 +29,66 @@ function groupRows(rows) {
 
 export const fetchRoutine = createAsyncThunk(
   "course/fetchRoutine",
-  async (__, { rejectWithValue }) => {
-    const { data, error } = await supabase
-      .from("routine_classes")
-      .select("*")
-      .order("start_time", { ascending: true });
+  async (_, { rejectWithValue }) => {
+    const rows = await fetch(`${localhost}/routine`, {
+      method: "GET",
+      credentials: "include",
+    });
+    const data = await rows.json();
+    console.log(data);
+    if (!rows.ok)
+      return rejectWithValue(data.message || "Failed to load routine");
 
-    if (error) return rejectWithValue(error.message);
-    return groupRows(data ?? []);
+    return groupRows(data.rows);
   },
 );
 
 export const updateRoutine = createAsyncThunk(
   "course/updateRoutine",
   async (payload, { rejectWithValue }) => {
-    const { id, ...updates } = payload;
-    const { data, error } = await supabase
-      .from("routine_classes")
-      .update(updates)
-      .eq("id", id)
-      .select("id");
+    try {
+      const result = await fetch(`${localhost}/routine/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
 
-    if (error) return rejectWithValue(error.message);
-    if (!data || data.length === 0) {
-      return rejectWithValue(
-        "No row updated. Check RLS policy or selected id.",
-      );
+      const data = await result.json();
+      if (!result.ok) return rejectWithValue(data.message);
+      return data.row;
+    } catch (err) {
+      return rejectWithValue("Failed to update course");
     }
-    return { id, ...updates };
   },
 );
 
 export const addNewCourse = createAsyncThunk(
   "course/addNewCourse",
   async (payload, { rejectWithValue }) => {
-    const { id, ...updates } = payload;
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError) return rejectWithValue(authError.message);
-    if (!authData.user) return rejectWithValue("You mus be logged in");
-    const { data, error } = await supabase
-      .from("routine_classes")
-      .insert({ ...updates, user_id: authData.user.id })
-      .select("*");
-
-    if (error) return rejectWithValue(error.message);
-    if (!data || data.length === 0) {
-      return rejectWithValue(
-        "No row updated. Check RLS policy or selected id.",
-      );
-    }
-    return data;
+    const result = await fetch(`${localhost}/routine/addnew`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+    const data = await result.json();
+    if (!result.ok) return rejectWithValue(data.message);
+    return data.row;
   },
 );
 
 export const removeCourse = createAsyncThunk(
   "course/removeCourse",
   async ({ id }, { rejectWithValue }) => {
-    const { data, error } = await supabase
-      .from("routine_classes")
-      .delete()
-      .eq("id", id)
-      .select();
+    const result = await fetch(`${localhost}/routine/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
-    if (error) return rejectWithValue(error.message);
-    if (!data || data.length === 0) {
-      return rejectWithValue("No row deleted. check if the ID exists");
-    }
-    return { id };
+    const data = await result.json();
+    if (!result.ok) return rejectWithValue(data.message);
+    return data.id;
   },
 );
 
@@ -125,40 +117,18 @@ const courseSlice = createSlice({
         state.status = "failed";
         state.error = action.payload || action.error.message;
       })
-      .addCase(updateRoutine.fulfilled, (state, action) => {
-        const updated = action.payload;
-
-        for (const day of state.scheduleDetails) {
-          const cls = day.classes.find((item) => item.id === updated.id);
-          if (!cls) continue;
-
-          cls.startTime = formatTime(updated.start_time);
-          cls.endTime = formatTime(updated.end_time);
-          cls.courseName = updated.course_name;
-          cls.courseCode = updated.course_code;
-          cls.facultyName = updated.faculty_name;
-          cls.sec = updated.sec;
-          cls.room = updated.room;
-          break;
-        }
-      })
+      .addCase(updateRoutine.fulfilled, (state, action) => {})
       .addCase(addNewCourse.fulfilled, (state, action) => {
         console.log("course added succesfully", action.payload);
       })
       .addCase(removeCourse.fulfilled, (state, action) => {
-        const deletedId = action.payload.id;
-
-        for (const day of state.scheduleDetails) {
-          const index = day.classes.findIndex((item) => item.id === deletedId);
-          if (index !== -1) {
-            day.classes.splice(index, 1);
-            break;
-          }
-        }
-
-        state.scheduleDetails = state.scheduleDetails.filter(
-          (day) => day.classes.length > 0,
-        );
+        const deletedId = action.payload;
+        state.scheduleDetails = state.scheduleDetails
+          .map((dayItem) => ({
+            ...dayItem,
+            classes: dayItem.classes.filter((cls) => cls.id !== deletedId),
+          }))
+          .filter((dayItem) => dayItem.classes.length > 0);
       });
   },
 });
